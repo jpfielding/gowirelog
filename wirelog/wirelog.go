@@ -74,19 +74,19 @@ func Plain(log io.WriteCloser, dial Dialer) Dialer {
 
 // TLS wraps encrypted dialers
 func TLS(log io.WriteCloser, insecureSkipVerify bool) Dialer {
+	return TLSConfig(log, &tls.Config{InsecureSkipVerify: insecureSkipVerify})
+}
+
+// TLSConfig wraps encrypted dialers
+func TLSConfig(log io.WriteCloser, config *tls.Config) Dialer {
 	return func(network, addr string) (net.Conn, error) {
-		config := &tls.Config{InsecureSkipVerify: insecureSkipVerify}
 		c, err := tls.Dial(network, addr, config)
 		if err != nil {
 			return nil, err
 		}
-		err = c.Handshake()
 		wire := Conn{
 			log:  log,
 			Conn: c,
-		}
-		if err != nil {
-			return &wire, err
 		}
 		return &wire, c.Handshake()
 	}
