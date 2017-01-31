@@ -38,13 +38,16 @@ func EnableProxy(trans *http.Transport, viaAddress string) error {
 
 // LogToFile provides quick setup for file logging
 func LogToFile(trans *http.Transport, log string, disableZip, insecure bool) error {
-	err := os.MkdirAll(filepath.Dir(log), 0777)
-	if err != nil {
-		return err
-	}
-	file, err := os.Create(log)
-	if err != nil {
-		return err
+	file, err := os.Open(log)
+	if os.IsNotExist(err) {
+		err = os.MkdirAll(filepath.Dir(log), 0777)
+		if err != nil {
+			return err
+		}
+		file, err = os.Create(log)
+		if err != nil {
+			return err
+		}
 	}
 	return LogToWriter(trans, file, disableZip, insecure)
 }
