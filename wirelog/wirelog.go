@@ -38,9 +38,9 @@ func EnableProxy(trans *http.Transport, viaAddress string) error {
 
 // LogToFile provides quick setup for file logging
 func LogToFile(trans *http.Transport, log string, disableZip, insecure bool) error {
-	file, err := os.OpenFile(log, os.O_APPEND|os.O_WRONLY, 0600)
+	file, err := os.OpenFile(log, os.O_APPEND|os.O_WRONLY, 0777)
 	if err != nil {
-		err = os.MkdirAll(filepath.Dir(log), 0600)
+		err = os.MkdirAll(filepath.Dir(log), 0777)
 		if err != nil {
 			return err
 		}
