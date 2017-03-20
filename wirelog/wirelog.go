@@ -113,3 +113,8 @@ func (c *Conn) Write(b []byte) (n int, err error) {
 	c.log.Write(b[0:write])
 	return write, err
 }
+
+func (c *Conn) Close() error {
+	c.log.Close()
+	return c.Conn.Close()
+}
