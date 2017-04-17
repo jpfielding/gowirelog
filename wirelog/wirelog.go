@@ -37,19 +37,19 @@ func EnableProxy(trans *http.Transport, viaAddress string) error {
 }
 
 // LogToFile provides quick setup for file logging
-func LogToFile(trans *http.Transport, log string, disableZip, insecure bool) error {
+func LogToFile(trans *http.Transport, log string, disableZip, insecure bool) (io.Closer, error) {
 	file, err := os.OpenFile(log, os.O_APPEND|os.O_WRONLY, 0777)
 	if err != nil {
 		err = os.MkdirAll(filepath.Dir(log), 0777)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		file, err = os.Create(log)
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
-	return LogToWriter(trans, file, disableZip, insecure)
+	return file, LogToWriter(trans, file, disableZip, insecure)
 }
 
 // LogToWriter provides the basic setup for http wirelogging
@@ -112,9 +112,4 @@ func (c *Conn) Write(b []byte) (n int, err error) {
 	write, err := c.Conn.Write(b)
 	c.log.Write(b[0:write])
 	return write, err
-}
-
-func (c *Conn) Close() error {
-	c.log.Close()
-	return c.Conn.Close()
 }
