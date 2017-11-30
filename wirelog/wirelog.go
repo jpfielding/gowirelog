@@ -53,7 +53,7 @@ func LogToFile(trans *http.Transport, log string, disableZip, insecure bool) (io
 }
 
 // LogToWriter provides the basic setup for http wirelogging
-func LogToWriter(trans *http.Transport, log io.WriteCloser, disableZip, insecure bool) error {
+func LogToWriter(trans *http.Transport, log io.Writer, disableZip, insecure bool) error {
 	trans.DisableCompression = disableZip
 	trans.Dial = Plain(log, trans.Dial)
 	trans.DialTLS = TLS(log, insecure)
@@ -64,7 +64,7 @@ func LogToWriter(trans *http.Transport, log io.WriteCloser, disableZip, insecure
 type Dialer func(network, addr string) (net.Conn, error)
 
 // Plain wraps the standard Dialer
-func Plain(log io.WriteCloser, dial Dialer) Dialer {
+func Plain(log io.Writer, dial Dialer) Dialer {
 	return func(network, addr string) (net.Conn, error) {
 		conn, err := dial(network, addr)
 		wire := Conn{
@@ -76,12 +76,12 @@ func Plain(log io.WriteCloser, dial Dialer) Dialer {
 }
 
 // TLS wraps encrypted dialers
-func TLS(log io.WriteCloser, insecureSkipVerify bool) Dialer {
+func TLS(log io.Writer, insecureSkipVerify bool) Dialer {
 	return TLSConfig(log, &tls.Config{InsecureSkipVerify: insecureSkipVerify})
 }
 
 // TLSConfig wraps encrypted dialers
-func TLSConfig(log io.WriteCloser, config *tls.Config) Dialer {
+func TLSConfig(log io.Writer, config *tls.Config) Dialer {
 	return func(network, addr string) (net.Conn, error) {
 		c, err := tls.Dial(network, addr, config)
 		if err != nil {
@@ -100,7 +100,7 @@ type Conn struct {
 	// embedded
 	net.Conn
 	// the destination for the split stream
-	log io.WriteCloser
+	log io.Writer
 }
 
 func (c *Conn) Read(b []byte) (n int, err error) {
