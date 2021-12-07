@@ -15,7 +15,7 @@ func main() {
 	transport := wirelog.NewHTTPTransport()
 	logname := "/tmp/logs/http.log"
 	closer, err := wirelog.LogToFile(transport, logname, true, true)
-  defer closer.Close()
+  	defer closer.Close()
 	client := &http.Client{
 		Transport: transport,
 	}
